@@ -6,7 +6,9 @@ import (
 	"strings"
 	"testing"
 
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"github.com/squatboy/multi-get/internal/query"
@@ -22,6 +24,49 @@ func TestRenderGenericTableAlwaysIncludesNamespace(t *testing.T) {
 	text := output.String()
 	if !strings.Contains(text, "NAMESPACE") || !strings.Contains(text, "dev") {
 		t.Fatalf("output %q", text)
+	}
+	if !strings.Contains(text, grayStart+"dev"+colorReset) {
+		t.Fatalf("namespace value is not gray: %q", text)
+	}
+	if !strings.Contains(text, boldStart+"NAMESPACE") {
+		t.Fatalf("namespace header is not bold: %q", text)
+	}
+	if strings.Contains(text, boldStart+"dev") {
+		t.Fatalf("namespace value should not be bold: %q", text)
+	}
+	if strings.Contains(text, grayStart+"NAMESPACE") {
+		t.Fatalf("namespace header should not be gray: %q", text)
+	}
+}
+
+func TestRenderServerTableColorsNamespaceValues(t *testing.T) {
+	result := testResult([]unstructured.Unstructured{testItem("dev", "api")})
+	result.TablePages = []query.TablePage{{
+		Namespace: "dev",
+		Table: metav1.Table{
+			ColumnDefinitions: []metav1.TableColumnDefinition{{Name: "NAME", Priority: 0}},
+			Rows: []metav1.TableRow{{
+				Cells: []interface{}{"api"},
+				Object: runtime.RawExtension{Object: &unstructured.Unstructured{Object: map[string]interface{}{
+					"metadata": map[string]interface{}{"namespace": "dev", "name": "api"},
+				}}},
+			}},
+		},
+	}}
+
+	var output bytes.Buffer
+	if err := Render(&output, []query.QueryResult{result}, Options{}); err != nil {
+		t.Fatal(err)
+	}
+	text := output.String()
+	if !strings.Contains(text, grayStart+"dev"+colorReset) {
+		t.Fatalf("namespace value is not gray: %q", text)
+	}
+	if !strings.Contains(text, boldStart+"NAMESPACE") {
+		t.Fatalf("namespace header is not bold: %q", text)
+	}
+	if strings.Contains(text, grayStart+"NAMESPACE") {
+		t.Fatalf("namespace header should not be gray: %q", text)
 	}
 }
 

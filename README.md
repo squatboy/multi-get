@@ -1,7 +1,7 @@
-# multi-get
-
 [![Go version](https://img.shields.io/github/go-mod/go-version/squatboy/multi-get?style=flat-square&logo=go&logoColor=white)](https://go.dev/)
 [![CI](https://img.shields.io/github/actions/workflow/status/squatboy/multi-get/test.yml?branch=main&style=flat-square&label=CI)](https://github.com/squatboy/multi-get/actions/workflows/test.yml)
+
+# multi-get
 
 kubectl [plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins/) that lets you query the same Kubernetes resource across multiple namespaces with one kubectl command.
 

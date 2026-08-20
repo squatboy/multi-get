@@ -25,6 +25,12 @@ type tableColumn struct {
 	source     int
 }
 
+const (
+	grayStart  = "\x1b[90m"
+	boldStart  = "\x1b[1m"
+	colorReset = "\x1b[0m"
+)
+
 func RenderTable(w io.Writer, results []query.QueryResult, opts TableOptions) error {
 	for index, result := range results {
 		if opts.Multi {
@@ -74,7 +80,7 @@ func renderServerTable(w io.Writer, result query.QueryResult, opts TableOptions)
 		selected = append(selected, tableColumn{definition: column, source: source})
 	}
 
-	rows := make(map[string][]interface{})
+	rowCells := make(map[string][]interface{})
 	for _, page := range result.TablePages {
 		for _, row := range page.Table.Rows {
 			object, err := tableRowObject(row)
@@ -85,16 +91,13 @@ func renderServerTable(w io.Writer, result query.QueryResult, opts TableOptions)
 			if namespace == "" {
 				namespace = page.Namespace
 			}
-			rows[objectKey(namespace, object.GetName())] = row.Cells
+			rowCells[objectKey(namespace, object.GetName())] = row.Cells
 		}
 	}
 
-	tw := tabwriter.NewWriter(w, 0, 4, 2, ' ', 0)
-	if !opts.NoHeaders {
-		writeTableLine(tw, headerNames(selected))
-	}
+	rows := make([][]string, 0, len(result.Items))
 	for _, item := range result.Items {
-		cells, ok := rows[objectKey(item.GetNamespace(), item.GetName())]
+		cells, ok := rowCells[objectKey(item.GetNamespace(), item.GetName())]
 		if !ok {
 			return false, nil
 		}
@@ -107,20 +110,72 @@ func renderServerTable(w io.Writer, result query.QueryResult, opts TableOptions)
 			}
 			line = append(line, formatCell(cells[column.source]))
 		}
-		writeTableLine(tw, line)
+		rows = append(rows, line)
 	}
-	return true, tw.Flush()
+	return true, renderAlignedTable(w, headerNames(selected), rows, opts.NoHeaders)
 }
 
 func renderGenericTable(w io.Writer, result query.QueryResult, noHeaders bool) error {
-	tw := tabwriter.NewWriter(w, 0, 4, 2, ' ', 0)
-	if !noHeaders {
-		writeTableLine(tw, []string{"NAMESPACE", "NAME", "AGE"})
-	}
+	rows := make([][]string, 0, len(result.Items))
 	for _, item := range result.Items {
-		writeTableLine(tw, []string{item.GetNamespace(), item.GetName(), formatAge(item.GetCreationTimestamp().Time)})
+		rows = append(rows, []string{item.GetNamespace(), item.GetName(), formatAge(item.GetCreationTimestamp().Time)})
 	}
-	return tw.Flush()
+	return renderAlignedTable(w, []string{"NAMESPACE", "NAME", "AGE"}, rows, noHeaders)
+}
+
+func renderAlignedTable(w io.Writer, headers []string, rows [][]string, noHeaders bool) error {
+	var table strings.Builder
+	tw := tabwriter.NewWriter(&table, 0, 4, 2, ' ', 0)
+	if !noHeaders {
+		writeTableLine(tw, headers)
+	}
+	for _, row := range rows {
+		writeTableLine(tw, row)
+	}
+	if err := tw.Flush(); err != nil {
+		return err
+	}
+	formatted := table.String()
+	if !noHeaders {
+		formatted = boldHeader(formatted)
+	}
+	_, err := io.WriteString(w, colorizeNamespaceValues(formatted, !noHeaders))
+	return err
+}
+
+func boldHeader(table string) string {
+	lineEnd := strings.IndexByte(table, '\n')
+	if lineEnd < 0 {
+		return boldStart + table + colorReset
+	}
+	return boldStart + table[:lineEnd] + colorReset + table[lineEnd:]
+}
+
+func colorizeNamespaceValues(table string, skipHeader bool) string {
+	var colored strings.Builder
+	for index, line := range strings.SplitAfter(table, "\n") {
+		if line == "" {
+			continue
+		}
+		if skipHeader && index == 0 {
+			colored.WriteString(line)
+			continue
+		}
+		content := strings.TrimSuffix(line, "\n")
+		fieldEnd := strings.IndexAny(content, " \t")
+		if fieldEnd <= 0 {
+			colored.WriteString(line)
+			continue
+		}
+		colored.WriteString(grayStart)
+		colored.WriteString(content[:fieldEnd])
+		colored.WriteString(colorReset)
+		colored.WriteString(content[fieldEnd:])
+		if strings.HasSuffix(line, "\n") {
+			colored.WriteByte('\n')
+		}
+	}
+	return colored.String()
 }
 
 func sameColumns(left, right []metav1.TableColumnDefinition) bool {
