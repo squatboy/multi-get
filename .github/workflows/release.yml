@@ -44,7 +44,7 @@ jobs:
         run: |
           mkdir -p dist
           go build -trimpath -ldflags='-s -w' -o dist/kubectl-multi ./cmd/kubectl-multi
-          tar -czf "dist/${{ matrix.archive }}" -C dist kubectl-multi
+          tar -czf "dist/${{ matrix.archive }}" -C dist kubectl-multi -C "$GITHUB_WORKSPACE" LICENSE
           rm dist/kubectl-multi
 
       - name: Upload release archive

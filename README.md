@@ -50,6 +50,15 @@ Verify the installation:
 kubectl multi --help
 ```
 
+### Krew
+
+After the initial plugin registration is merged into the Krew index, install it with:
+
+```bash
+kubectl krew install multi
+kubectl multi get pods -n dev,stage
+```
+
 ### Local Build
 
 Build the plugin locally:
@@ -116,7 +125,9 @@ Namespace requests and resource requests are sequential. Successful results are 
 | Table, wide, JSON, YAML, name, and template output | Multi-resource with object names |
 | Namespaced built-in resources and namespaced CRDs | Namespace exclude and parallel queries |
 
-The plugin does not register with Krew or provide shell-completion.
+The repository includes a Krew manifest template for the initial registration. Until it is
+available in the Krew index, use the manual installer above. The plugin does not provide
+shell-completion.
 
 ## Verification
 

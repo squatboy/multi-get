@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/squatboy/multi-get/internal/cli"
+	_ "k8s.io/client-go/plugin/pkg/client/auth"
 )
 
 func main() {

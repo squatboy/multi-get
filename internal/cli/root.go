@@ -29,8 +29,11 @@ func NewRootCommand(ctx context.Context, stdout, stderr io.Writer) *cobra.Comman
 	configFlags.Namespace = nil
 
 	root := &cobra.Command{
-		Use:           "kubectl-multi",
-		Short:         "Query namespaced Kubernetes resources across namespaces",
+		Use:   "kubectl-multi",
+		Short: "Query namespaced Kubernetes resources across namespaces",
+		Annotations: map[string]string{
+			cobra.CommandDisplayNameAnnotation: "kubectl multi",
+		},
 		SilenceErrors: true,
 		SilenceUsage:  true,
 	}
