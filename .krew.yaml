@@ -5,7 +5,7 @@ metadata:
 spec:
   version: {{ .TagName }}
   homepage: https://github.com/squatboy/multi-get
-  shortDescription: Query Kubernetes resources across multiple namespaces
+  shortDescription: Query resources across namespaces
   description: |
     Query the same Kubernetes resource across multiple namespaces with one
     kubectl command. Select namespaces explicitly, find them by name, or
