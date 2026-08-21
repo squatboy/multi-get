@@ -18,16 +18,16 @@ jobs:
         include:
           - goos: darwin
             goarch: amd64
-            archive: kubectl-multi_darwin_amd64.tar.gz
+            archive: kubectl-multi-get_darwin_amd64.tar.gz
           - goos: darwin
             goarch: arm64
-            archive: kubectl-multi_darwin_arm64.tar.gz
+            archive: kubectl-multi-get_darwin_arm64.tar.gz
           - goos: linux
             goarch: amd64
-            archive: kubectl-multi_linux_amd64.tar.gz
+            archive: kubectl-multi-get_linux_amd64.tar.gz
           - goos: linux
             goarch: arm64
-            archive: kubectl-multi_linux_arm64.tar.gz
+            archive: kubectl-multi-get_linux_arm64.tar.gz
     steps:
       - uses: actions/checkout@v4
 
@@ -43,9 +43,9 @@ jobs:
           CGO_ENABLED: '0'
         run: |
           mkdir -p dist
-          go build -trimpath -ldflags='-s -w' -o dist/kubectl-multi ./cmd/kubectl-multi
-          tar -czf "dist/${{ matrix.archive }}" -C dist kubectl-multi -C "$GITHUB_WORKSPACE" LICENSE
-          rm dist/kubectl-multi
+          go build -trimpath -ldflags='-s -w' -o dist/kubectl-multi-get ./cmd/kubectl-multi-get
+          tar -czf "dist/${{ matrix.archive }}" -C dist kubectl-multi-get -C "$GITHUB_WORKSPACE" LICENSE
+          rm dist/kubectl-multi-get
 
       - name: Upload release archive
         uses: actions/upload-artifact@v4

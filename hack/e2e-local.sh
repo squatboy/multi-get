@@ -13,7 +13,7 @@ repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 kubectl_bin="$(command -v kubectl)"
 go_bin="${GO:-go}"
 
-"$go_bin" build -o "$repo_root/bin/kubectl-multi" ./cmd/kubectl-multi
+"$go_bin" build -o "$repo_root/bin/kubectl-multi-get" ./cmd/kubectl-multi-get
 export PATH="$repo_root/bin:$PATH"
 
 context_name="$(kubectl config current-context)"
@@ -171,35 +171,35 @@ spec: {}
 EOF
 done
 
-kubectl multi get pods -n "${namespace_a},${namespace_b}" >/dev/null
-kubectl multi get pods -n "${namespace_b},${namespace_a}" >/dev/null
-kubectl multi get pods --find-ns "${prefix}-dev" >/dev/null
-kubectl multi get pods -A >/dev/null
-kubectl multi get pods,services -n "${namespace_a},${namespace_b}" >/dev/null
-kubectl multi get pods -n "${namespace_a},${namespace_b}" -l app=multi-get-e2e >/dev/null
-kubectl multi get pods -n "${namespace_a},${namespace_b}" --field-selector "metadata.namespace=${namespace_a}" >/dev/null
-kubectl multi get pods -n "${namespace_a},${namespace_b}" -o wide >/dev/null
+kubectl multi-get get pods -n "${namespace_a},${namespace_b}" >/dev/null
+kubectl multi-get get pods -n "${namespace_b},${namespace_a}" >/dev/null
+kubectl multi-get get pods --find-ns "${prefix}-dev" >/dev/null
+kubectl multi-get get pods -A >/dev/null
+kubectl multi-get get pods,services -n "${namespace_a},${namespace_b}" >/dev/null
+kubectl multi-get get pods -n "${namespace_a},${namespace_b}" -l app=multi-get-e2e >/dev/null
+kubectl multi-get get pods -n "${namespace_a},${namespace_b}" --field-selector "metadata.namespace=${namespace_a}" >/dev/null
+kubectl multi-get get pods -n "${namespace_a},${namespace_b}" -o wide >/dev/null
 
-json_output="$(kubectl multi get pods -n "${namespace_a},${namespace_b}" -o json)"
+json_output="$(kubectl multi-get get pods -n "${namespace_a},${namespace_b}" -o json)"
 grep -q '"kind": "List"' <<<"$json_output"
 grep -q "${namespace_a}" <<<"$json_output"
-kubectl multi get pods -n "${namespace_a},${namespace_b}" -o yaml >/dev/null
-kubectl multi get pods -n "${namespace_a},${namespace_b}" -o name >/dev/null
-kubectl multi get widgets -n "${namespace_a},${namespace_b}" >/dev/null
+kubectl multi-get get pods -n "${namespace_a},${namespace_b}" -o yaml >/dev/null
+kubectl multi-get get pods -n "${namespace_a},${namespace_b}" -o name >/dev/null
+kubectl multi-get get widgets -n "${namespace_a},${namespace_b}" >/dev/null
 
-if kubectl multi get pods --find-ns "${prefix}-missing" >/dev/null 2>&1; then
+if kubectl multi-get get pods --find-ns "${prefix}-missing" >/dev/null 2>&1; then
 	echo "expected no-match to fail" >&2
 	exit 1
 fi
-if kubectl multi get pods,services "${prefix}-pod" -n "$namespace_a" >/dev/null 2>&1; then
+if kubectl multi-get get pods,services "${prefix}-pod" -n "$namespace_a" >/dev/null 2>&1; then
 	echo "expected multi-resource named lookup to fail" >&2
 	exit 1
 fi
-if kubectl multi get pods,services -o json -n "$namespace_a" >/dev/null 2>&1; then
+if kubectl multi-get get pods,services -o json -n "$namespace_a" >/dev/null 2>&1; then
 	echo "expected multi-resource structured output to fail" >&2
 	exit 1
 fi
-if kubectl multi get nodes -A >/dev/null 2>&1; then
+if kubectl multi-get get nodes -A >/dev/null 2>&1; then
 	echo "expected cluster-scoped lookup to fail" >&2
 	exit 1
 fi
