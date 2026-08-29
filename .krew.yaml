@@ -1,0 +1,57 @@
+apiVersion: krew.googlecontainertools.github.com/v1alpha2
+kind: Plugin
+metadata:
+  name: multi-get
+spec:
+  version: {{ .TagName }}
+  homepage: https://github.com/squatboy/multi-get
+  shortDescription: Query resources across namespaces
+  description: |
+    Query the same Kubernetes resource across multiple namespaces with one
+    kubectl command. Select namespaces explicitly, find them by name, or
+    query every namespace.
+  platforms:
+  - selector:
+      matchLabels:
+        os: darwin
+        arch: amd64
+    {{addURIAndSha "https://github.com/squatboy/multi-get/releases/download/{{ .TagName }}/kubectl-multi-get_darwin_amd64.tar.gz" .TagName }}
+    bin: kubectl-multi-get
+    files:
+    - from: kubectl-multi-get
+      to: .
+    - from: LICENSE
+      to: .
+  - selector:
+      matchLabels:
+        os: darwin
+        arch: arm64
+    {{addURIAndSha "https://github.com/squatboy/multi-get/releases/download/{{ .TagName }}/kubectl-multi-get_darwin_arm64.tar.gz" .TagName }}
+    bin: kubectl-multi-get
+    files:
+    - from: kubectl-multi-get
+      to: .
+    - from: LICENSE
+      to: .
+  - selector:
+      matchLabels:
+        os: linux
+        arch: amd64
+    {{addURIAndSha "https://github.com/squatboy/multi-get/releases/download/{{ .TagName }}/kubectl-multi-get_linux_amd64.tar.gz" .TagName }}
+    bin: kubectl-multi-get
+    files:
+    - from: kubectl-multi-get
+      to: .
+    - from: LICENSE
+      to: .
+  - selector:
+      matchLabels:
+        os: linux
+        arch: arm64
+    {{addURIAndSha "https://github.com/squatboy/multi-get/releases/download/{{ .TagName }}/kubectl-multi-get_linux_arm64.tar.gz" .TagName }}
+    bin: kubectl-multi-get
+    files:
+    - from: kubectl-multi-get
+      to: .
+    - from: LICENSE
+      to: .

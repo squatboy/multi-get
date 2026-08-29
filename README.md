@@ -8,9 +8,9 @@ kubectl [plugin](https://kubernetes.io/docs/tasks/extend-kubectl/kubectl-plugins
 Choose the namespaces explicitly, find them by name, or query every namespace:
 
 ```bash
-kubectl multi get pods -n dev,stage,prod
-kubectl multi get deploy --find-ns dev
-kubectl multi get pods -A
+kubectl multi-get get pods -n dev,stage,prod
+kubectl multi-get get deploy --find-ns dev
+kubectl multi-get get pods -A
 ```
 
 This multi-namespace lookup is the core feature. The plugin sends the resource query to each selected Namespace and combines the results with the Namespace shown in human-readable output.
@@ -21,10 +21,10 @@ Regular kubectl already supports multiple resource kinds in one namespace:
 kubectl get pod,svc,pvc -n dev
 ```
 
-It also supports all namespaces for many normal list commands. `kubectl-multi` keeps those familiar resource expressions as a secondary composition feature, so the following applies each resource query to both namespaces and prints separate blocks:
+It also supports all namespaces for many normal list commands. `kubectl-multi-get` keeps those familiar resource expressions as a secondary composition feature, so the following applies each resource query to both namespaces and prints separate blocks:
 
 ```bash
-kubectl multi get pods,services -n dev,stage
+kubectl multi-get get pods,services -n dev,stage
 ```
 
 ## Install
@@ -38,7 +38,7 @@ curl -fsSL https://github.com/squatboy/multi-get/releases/latest/download/instal
 ```
 
 The installer detects the operating system and CPU architecture, verifies the
-downloaded archive, and installs `kubectl-multi` into `$HOME/.local/bin`.
+downloaded archive, and installs `kubectl-multi-get` into `$HOME/.local/bin`.
 
 The installer adds `$HOME/.local/bin` to the detected shell configuration.
 Open a new terminal, or reload the shell configuration using the command shown
@@ -47,7 +47,23 @@ by the installer.
 Verify the installation:
 
 ```bash
-kubectl multi --help
+kubectl multi-get --help
+```
+
+### Krew
+
+Install from the official Krew index:
+
+```bash
+kubectl krew update
+kubectl krew install multi-get
+```
+
+Verify the installation:
+
+```bash
+kubectl multi-get --help
+kubectl multi-get get pods -n dev,stage
 ```
 
 ### Local Build
@@ -57,7 +73,7 @@ Build the plugin locally:
 ```bash
 make build
 export PATH="$PWD/bin:$PATH"
-kubectl multi get pods -n dev,stage
+kubectl multi-get get pods -n dev,stage
 ```
 
 This repository targets Go 1.25.x and Kubernetes client modules v0.35.x.
@@ -70,10 +86,10 @@ Exactly one namespace mode is used:
 
 | Command | Behavior |
 | --- | --- |
-| `kubectl multi get pods` | Current context namespace, or `default` |
-| `kubectl multi get pods -n dev,stage` | Explicit namespaces, in input order |
-| `kubectl multi get pods --find-ns dev` | Namespace names containing `dev`, sorted by name |
-| `kubectl multi get pods -A` | All namespaces, sorted by name |
+| `kubectl multi-get get pods` | Current context namespace, or `default` |
+| `kubectl multi-get get pods -n dev,stage` | Explicit namespaces, in input order |
+| `kubectl multi-get get pods --find-ns dev` | Namespace names containing `dev`, sorted by name |
+| `kubectl multi-get get pods -A` | All namespaces, sorted by name |
 
 Explicit lists trim whitespace and remove duplicate names while preserving the first occurrence. Empty entries and mixed namespace modes are errors. `--find-ns` trims the search text and matches it literally anywhere in each Namespace name. Empty search text and a search with no matches are errors and do not start resource requests.
 
@@ -82,24 +98,24 @@ Explicit lists trim whitespace and remove duplicate names while preserving the f
 Selectors are sent to every namespaced List request:
 
 ```bash
-kubectl multi get pods -n dev,stage -l app=backend -o wide
-kubectl multi get pods -n dev,stage --field-selector status.phase=Running
-kubectl multi get pods -n dev,stage --sort-by=.metadata.creationTimestamp
+kubectl multi-get get pods -n dev,stage -l app=backend -o wide
+kubectl multi-get get pods -n dev,stage --field-selector status.phase=Running
+kubectl multi-get get pods -n dev,stage --sort-by=.metadata.creationTimestamp
 ```
 
 Supported output formats are `wide`, `json`, `yaml`, `name`, `custom-columns`, `jsonpath`, and `go-template`. Human tables always put `NAMESPACE` first. JSON and YAML for one resource are emitted as one Kubernetes `List` object.
 
 ```bash
-kubectl multi get pods -n dev,stage -o json
-kubectl multi get pods -n dev,stage -o name
-kubectl multi get pods -n dev,stage -o 'custom-columns=NAME:.metadata.name,PHASE:.status.phase'
+kubectl multi-get get pods -n dev,stage -o json
+kubectl multi-get get pods -n dev,stage -o name
+kubectl multi-get get pods -n dev,stage -o 'custom-columns=NAME:.metadata.name,PHASE:.status.phase'
 ```
 
 Named lookup supports multiple object names for one resource type:
 
 ```bash
-kubectl multi get pod api web -n dev,stage
-kubectl multi get pod missing -n dev,stage --ignore-not-found
+kubectl multi-get get pod api web -n dev,stage
+kubectl multi-get get pod missing -n dev,stage --ignore-not-found
 ```
 
 Namespace requests and resource requests are sequential. Successful results are printed even when another namespace or resource request fails; any real API error still gives exit code 1.
@@ -116,7 +132,9 @@ Namespace requests and resource requests are sequential. Successful results are 
 | Table, wide, JSON, YAML, name, and template output | Multi-resource with object names |
 | Namespaced built-in resources and namespaced CRDs | Namespace exclude and parallel queries |
 
-The plugin does not register with Krew or provide shell-completion.
+The repository includes the Krew manifest template used for the
+[official index](https://github.com/kubernetes-sigs/krew-index/blob/master/plugins/multi-get.yaml).
+The plugin does not provide shell-completion.
 
 ## Verification
 

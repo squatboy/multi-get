@@ -20,7 +20,7 @@ func Run(ctx context.Context, args []string, stdout, stderr io.Writer) int {
 	return 0
 }
 
-// NewRootCommand creates the kubectl-multi command tree.
+// NewRootCommand creates the kubectl-multi-get command tree.
 func NewRootCommand(ctx context.Context, stdout, stderr io.Writer) *cobra.Command {
 	configFlags := genericclioptions.NewConfigFlags(false)
 	// -n/--namespace belongs to this plugin and means a comma-separated list.
@@ -29,8 +29,11 @@ func NewRootCommand(ctx context.Context, stdout, stderr io.Writer) *cobra.Comman
 	configFlags.Namespace = nil
 
 	root := &cobra.Command{
-		Use:           "kubectl-multi",
-		Short:         "Query namespaced Kubernetes resources across namespaces",
+		Use:   "kubectl-multi-get",
+		Short: "Query namespaced Kubernetes resources across namespaces",
+		Annotations: map[string]string{
+			cobra.CommandDisplayNameAnnotation: "kubectl multi-get",
+		},
 		SilenceErrors: true,
 		SilenceUsage:  true,
 	}

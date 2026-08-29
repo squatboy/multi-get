@@ -3,7 +3,7 @@
 set -eu
 
 die() {
-  echo "kubectl-multi installer: $*" >&2
+  echo "kubectl-multi-get installer: $*" >&2
   exit 1
 }
 
@@ -51,11 +51,11 @@ esac
 
 base_url=${MULTI_GET_RELEASE_BASE_URL:-https://github.com/squatboy/multi-get/releases/latest/download}
 base_url=${base_url%/}
-archive_name="kubectl-multi_${release_os}_${release_arch}.tar.gz"
+archive_name="kubectl-multi-get_${release_os}_${release_arch}.tar.gz"
 tmp_dir=
 staged_target=
 
-if ! tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/kubectl-multi-install.XXXXXX"); then
+if ! tmp_dir=$(mktemp -d "${TMPDIR:-/tmp}/kubectl-multi-get-install.XXXXXX"); then
   die "could not create a temporary directory"
 fi
 
@@ -79,7 +79,7 @@ download() {
 archive_path="$tmp_dir/$archive_name"
 checksums_path="$tmp_dir/checksums.txt"
 
-echo "Downloading kubectl-multi for $release_os/$release_arch..."
+echo "Downloading kubectl-multi-get for $release_os/$release_arch..."
 download "$base_url/$archive_name" "$archive_path"
 download "$base_url/checksums.txt" "$checksums_path"
 
@@ -115,24 +115,24 @@ if ! tar -xzf "$archive_path" -C "$extract_dir"; then
   die "could not extract $archive_name"
 fi
 
-binary_path="$extract_dir/kubectl-multi"
-[ -f "$binary_path" ] || die "archive does not contain kubectl-multi"
+binary_path="$extract_dir/kubectl-multi-get"
+[ -f "$binary_path" ] || die "archive does not contain kubectl-multi-get"
 
 install_dir="$home/.local/bin"
-target_path="$install_dir/kubectl-multi"
+target_path="$install_dir/kubectl-multi-get"
 if ! mkdir -p "$install_dir"; then
   die "could not create $install_dir"
 fi
 
-staged_target="$install_dir/.kubectl-multi.$$"
+staged_target="$install_dir/.kubectl-multi-get.$$"
 if ! cp "$binary_path" "$staged_target"; then
-  die "could not stage kubectl-multi"
+  die "could not stage kubectl-multi-get"
 fi
 if ! chmod 0755 "$staged_target"; then
-  die "could not make kubectl-multi executable"
+  die "could not make kubectl-multi-get executable"
 fi
 if ! mv -f "$staged_target" "$target_path"; then
-  die "could not install kubectl-multi into $install_dir"
+  die "could not install kubectl-multi-get into $install_dir"
 fi
 staged_target=
 
@@ -157,17 +157,17 @@ path_status=
 if [ -n "$shell_config" ]; then
   if [ -f "$shell_config" ] && grep -F '$HOME/.local/bin' "$shell_config" >/dev/null 2>&1; then
     path_status="already present"
-  elif printf '\n# kubectl-multi\n%s\n' "$path_line" >> "$shell_config"; then
+  elif printf '\n# kubectl-multi-get\n%s\n' "$path_line" >> "$shell_config"; then
     path_status="added to $shell_config"
   else
     path_status="could not update $shell_config"
   fi
 fi
 
-echo "Installed kubectl-multi to $target_path."
+echo "Installed kubectl-multi-get to $target_path."
 if [ -n "$shell_config" ]; then
   echo "PATH entry: $path_status."
   echo "Reload your shell with: . \"$shell_config\""
 else
-  echo "Add $install_dir to PATH before running kubectl multi."
+  echo "Add $install_dir to PATH before running kubectl multi-get."
 fi
