@@ -52,10 +52,17 @@ kubectl multi-get --help
 
 ### Krew
 
-After the initial plugin registration is merged into the Krew index, install it with:
+Install from the official Krew index:
 
 ```bash
-kubectl krew install multi
+kubectl krew update
+kubectl krew install multi-get
+```
+
+Verify the installation:
+
+```bash
+kubectl multi-get --help
 kubectl multi-get get pods -n dev,stage
 ```
 
@@ -125,9 +132,9 @@ Namespace requests and resource requests are sequential. Successful results are 
 | Table, wide, JSON, YAML, name, and template output | Multi-resource with object names |
 | Namespaced built-in resources and namespaced CRDs | Namespace exclude and parallel queries |
 
-The repository includes a Krew manifest template for the initial registration. Until it is
-available in the Krew index, use the manual installer above. The plugin does not provide
-shell-completion.
+The repository includes the Krew manifest template used for the
+[official index](https://github.com/kubernetes-sigs/krew-index/blob/master/plugins/multi-get.yaml).
+The plugin does not provide shell-completion.
 
 ## Verification
 
